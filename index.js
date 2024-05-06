@@ -15,6 +15,7 @@ cloudinary.config({
 const app = express();
 const PORT = 5000;
 
+//cors config
 const corsConfig = {
   origin: "*",
   credential: true,
