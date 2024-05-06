@@ -63,17 +63,17 @@ async function run() {
 
     const upload = multer({ storage: storage });
 
-    // const deleteImageFiles = (filePaths) => {
-    //   filePaths.forEach((filePath) => {
-    //     fs.unlink(filePath, (err) => {
-    //       if (err) {
-    //         console.error("Error deleting file:", err);
-    //       } else {
-    //         console.log("File deleted:", filePath);
-    //       }
-    //     });
-    //   });
-    // };
+    const deleteImageFiles = (filePaths) => {
+      filePaths.forEach((filePath) => {
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error("Error deleting file:", err);
+          } else {
+            console.log("File deleted:", filePath);
+          }
+        });
+      });
+    };
 
     // Route to handle form submissions
     app.post("/products", upload.array("images"), async (req, res) => {
@@ -92,7 +92,7 @@ async function run() {
         });
 
         // Delete uploaded image files from backend folder
-        // deleteImageFiles(req.files.map((file) => file.path));
+        deleteImageFiles(req.files.map((file) => file.path));
 
         res.status(201).send("Form data saved successfully");
       } catch (error) {
