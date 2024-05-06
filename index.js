@@ -1,17 +1,26 @@
+const cloudinary = require("cloudinary").v2;
+const fs = require('fs');
 const express = require("express");
+const multer = require("multer");
 const cors = require("cors");
 const { MongoClient, ObjectId } = require("mongodb");
+
+cloudinary.config({
+  cloud_name: "dnubkinf8",
+  api_key: "663479251351193",
+  api_secret: "sADfmj4_ijG7krWdIgYeHhXuWSQ",
+});
 
 const app = express();
 const PORT = 5000;
 
 const corsConfig = {
-    origin: "*",
-    credential: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-}
+  origin: "*",
+  credential: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+};
 
-app.options("", cors(corsConfig))
+app.options("", cors(corsConfig));
 app.use(express.json());
 app.use(cors(corsConfig));
 
@@ -22,25 +31,73 @@ const client = new MongoClient(uri);
 async function run() {
   try {
     client.connect();
-
     const productCollection = client.db("csc").collection("products");
     const projectCollection = client.db("csc").collection("projects");
     const reviewCollection = client.db("csc").collection("review");
     const contactCollection = client.db("csc").collection("contact");
 
-    app.post("/products", async (req, res) => {
-      const product = req.body;
+    // app.post("/products", async (req, res) => {
+    //   const product = req.body;
+    //   try {
+    //     const result = await productCollection.insertOne(product);
+    //     if (result) {
+    //       res.status(201).send("Product added successfully");
+    //     } else {
+    //       res.status(500).send("Failed to add product");
+    //       console.error("Failed to add products");
+    //     }
+    //   } catch (error) {
+    //     console.error("Error adding product:", error);
+    //     res.status(500).send("Failed to add product");
+    //   }
+    // });
+
+    const storage = multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, "uploads/");
+      },
+      filename: function (req, file, cb) {
+        cb(null, Date.now() + "-" + file.originalname);
+      },
+    });
+
+    const upload = multer({ storage: storage });
+
+    const deleteImageFiles = (filePaths) => {
+      filePaths.forEach((filePath) => {
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error("Error deleting file:", err);
+          } else {
+            console.log("File deleted:", filePath);
+          }
+        });
+      });
+    };
+
+    // Route to handle form submissions
+    app.post("/form", upload.array("images"), async (req, res) => {
       try {
-        const result = await productCollection.insertOne(product);
-        if (result) {
-          res.status(201).send("Product added successfully");
-        } else {
-          res.status(500).send("Failed to add product");
-          console.error("Failed to add products");
-        }
+        const { name, description } = req.body;
+        const uploadedImages = await Promise.all(
+          req.files.map((file) => cloudinary.uploader.upload(file.path))
+        );
+        const imageUrls = uploadedImages.map((image) => image.secure_url);
+
+        // Insert document into MongoDB with Cloudinary URLs
+        await productCollection.insertOne({
+          name,
+          description,
+          images: imageUrls,
+        });
+
+        // Delete uploaded image files from backend folder
+        deleteImageFiles(req.files.map((file) => file.path));
+
+        res.status(201).send("Form data saved successfully");
       } catch (error) {
-        console.error("Error adding product:", error);
-        res.status(500).send("Failed to add product");
+        console.error("Error saving form data:", error);
+        res.status(500).send("Internal Server Error");
       }
     });
 
@@ -170,7 +227,7 @@ async function run() {
       }
     });
 
-// this line just for check 
+    // this line just for check
     app.get("/contact", async (req, res) => {
       const query = {};
       const review = await contactCollection.find(query).toArray();
@@ -178,8 +235,6 @@ async function run() {
         return res.send(review);
       }
     });
-
-
 
     app.delete("/contact/:id", async (req, res) => {
       const id = req.params.id;
@@ -198,8 +253,6 @@ async function run() {
         res.status(404).json({ success: false, message: "message not found" });
       }
     });
-
-
 
     app.get("/", async (req, res) => {
       res.send("server is running");
