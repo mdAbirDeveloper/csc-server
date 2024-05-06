@@ -4,7 +4,14 @@ const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
 const { MongoClient, ObjectId } = require("mongodb");
+
+
+const app = express();
+const PORT = 5000;
+
 app.use(cors());
+app.use(express.json());
+
 
 cloudinary.config({
   cloud_name: "dnubkinf8",
@@ -12,12 +19,6 @@ cloudinary.config({
   api_secret: "sADfmj4_ijG7krWdIgYeHhXuWSQ",
   api_environment_key: "cloudinary://663479251351193:sADfmj4_ijG7krWdIgYeHhXuWSQ@dnubkinf8"
 });
-
-const app = express();
-const PORT = 5000;
-
-
-app.use(express.json());
 
 
 const uri =
