@@ -15,16 +15,10 @@ cloudinary.config({
 const app = express();
 const PORT = 5000;
 
-//cors config
-const corsConfig = {
-  origin: "*",
-  credential: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-};
 
-app.options("", cors(corsConfig));
+
 app.use(express.json());
-app.use(cors(corsConfig));
+app.use(cors());
 
 const uri =
   "mongodb+srv://abdullah:MJsodSF9rnyxjyE5@cluster0.rlhccww.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
