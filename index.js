@@ -5,6 +5,9 @@ const multer = require("multer");
 const cors = require("cors");
 const { MongoClient, ObjectId } = require("mongodb");
 
+app.use(express.json());
+app.use(cors());
+
 cloudinary.config({
   cloud_name: "dnubkinf8",
   api_key: "663479251351193",
@@ -16,9 +19,6 @@ const app = express();
 const PORT = 5000;
 
 
-
-app.use(express.json());
-app.use(cors());
 
 const uri =
   "mongodb+srv://abdullah:MJsodSF9rnyxjyE5@cluster0.rlhccww.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
