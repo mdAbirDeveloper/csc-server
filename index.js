@@ -53,28 +53,7 @@ async function run() {
     //   }
     // });
 
-    const storage = multer.diskStorage({
-      destination: function (req, file, cb) {
-        cb(null, "uploads/");
-      },
-      filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
-      },
-    });
-
-    const upload = multer({ storage: storage });
-
-    const deleteImageFiles = (filePaths) => {
-      filePaths.forEach((filePath) => {
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.error("Error deleting file:", err);
-          } else {
-            console.log("File deleted:", filePath);
-          }
-        });
-      });
-    };
+    const upload = multer();
 
     // Route to handle form submissions
     app.post("/products", upload.array("images"), async (req, res) => {
@@ -84,23 +63,21 @@ async function run() {
           req.files.map((file) => cloudinary.uploader.upload(file.path))
         );
         const imageUrls = uploadedImages.map((image) => image.secure_url);
-
+    
         // Insert document into MongoDB with Cloudinary URLs
         await productCollection.insertOne({
           name,
           description,
           images: imageUrls,
         });
-
-        // Delete uploaded image files from backend folder
-        deleteImageFiles(req.files.map((file) => file.path));
-
+    
         res.status(201).send("Form data saved successfully");
       } catch (error) {
         console.error("Error saving form data:", error);
         res.status(500).send("Internal Server Error");
       }
     });
+    
 
     app.get("/products", async (req, res) => {
       const query = {};
