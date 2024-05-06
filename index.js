@@ -6,9 +6,10 @@ const cors = require("cors");
 const { MongoClient, ObjectId } = require("mongodb");
 
 cloudinary.config({
-  cloud_name: "dnubkinf8",
-  api_key: "663479251351193",
-  api_secret: "sADfmj4_ijG7krWdIgYeHhXuWSQ",
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+  api_environment_key: process.env.API_ENVIROMENT_VARIABLE
 });
 
 const app = express();
