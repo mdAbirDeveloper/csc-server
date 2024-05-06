@@ -76,7 +76,7 @@ async function run() {
     };
 
     // Route to handle form submissions
-    app.post("/form", upload.array("images"), async (req, res) => {
+    app.post("/products", upload.array("images"), async (req, res) => {
       try {
         const { name, description } = req.body;
         const uploadedImages = await Promise.all(
